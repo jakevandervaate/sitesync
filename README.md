@@ -12,9 +12,9 @@ These repo features 4 directories and a config file. The 4 directories are "asse
 
 This directory houses all the common files that the website can share, including the HTML header and footer for the website. 
 
-The HTML header can be as basic as the minimum information included at the beginning of and HTML file (<!DOCTYPE html> ... ). You can also include any menus or title bars that you want to be present on every page. 
+The HTML header can be as basic as the minimum information included at the beginning of and HTML file. You can also include any menus or title bars that you want to be present on every page. 
 
-The HTML footer serves a similar function; it can be as basic as thae minimum information you need ( ... </html>), or have as many links or other elements as you please.
+The HTML footer serves a similar function; it can be as basic as thae minimum information you need, or have as many links or other elements as you please.
 
 You can also add any other files you want to be placed in the root directory of your website (styles.css, robots.txt, humans.txt, favicon.ico, etc.). Everything in this directory, except for the header and footer, will be synced into the website's root directory when you run the sitesync.sh script.
 
