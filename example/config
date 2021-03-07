@@ -5,6 +5,6 @@ website="" #your server's ip address or your website's domain
 vpsdir="" #the directory on your server where your website lives (no trailing slash)
 
 # Example 
-# user="bill"
-# website="127.0.0.1" or website="example.com"
-# vpsdir="var/www/example 
+# user="name"
+# website="127.0.0.1" or website="example.com" (this can be the server IP or your domain, however you have it setup for SSH is fine)
+# vpsdir="var/www/example" 

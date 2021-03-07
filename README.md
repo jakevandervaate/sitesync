@@ -68,7 +68,7 @@ cd into the newly cloned directory:
 
 Make the script executable:
 
-`sudo chmod +x ./sitesync.sh`
+`chmod +x ./sitesync.sh`
 
 Now you are ready to use the script. This repo includes an example directory that you can test the script on. 
 
