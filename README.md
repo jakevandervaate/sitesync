@@ -78,3 +78,21 @@ Now you can view the local version of this website. Navigate to the `example/loc
 
 
 Now you can use this to create as many websites as you like. Just make sure that they all feature the basic directory structure that I've written aout here.
+
+## Blogsync
+
+Blogsync adds a blog functionality to the website. Blogsync.sh is a seperate script from Sitesync. Before running Blogsync, configure the config file in the website's directory (it has comments).
+
+Once the config file is configured create a blog directory in the "content" directory.
+
+``cd example/content/ && mkdir blog``
+
+The naming convention for blog posts in the blog/ directory is yyyy-mm-dd_Name_of_the_Post.html.
+This syntax is important for the ordering of the blog posts on the blog page.
+The blog page displays posts in reverse-chronological order (newest posts at the top of the page) and needs the date in this format to do that correctly.
+
+Once the config file is setup, the content/blog directory exists, and there is at least one blog post in the directory, run the following command to generate the blog page and RSS file.
+
+``path/to/blogsync.sh path/to/website`` 
+
+where "website" is the root directory for the site.

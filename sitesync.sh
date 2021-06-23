@@ -19,7 +19,7 @@ for file in $(find "$dir" -iname '*.html'); do
 	cat "$assets"/header.html > "$name" && echo "$pagecontent" >> "$name" && cat "$assets"/footer.html >> "$name"
 done
 
-rsync -a "$assets"/* "$dir"/ --exclude ./*.html
+rsync -a "$assets"/* "$dir"/ --exclude *.html
 
 sed -i "s|PATHTOSOURCE/||g" "$wsd"/"$dir"/*.html && sed -i -e 's|PATHTOSOURCE|..|g' -e "s|f='sty|f='../sty|g" "$wsd"/"$dir"/*/*.html 2>/dev/null || :
 

@@ -4,6 +4,14 @@ user="" #the username to log into your server
 website="" #your server's ip address or your website's domain
 vpsdir="" #the directory on your server where your website lives (no trailing slash)
 
+#Blog Feature Variables
+blog_page="blog.html" #the page where blog posts are displayed
+post_dir="blog" #the subdirectory in the content directory where blog posts are stored
+rss_file="rss.xml"
+blog_title="" #the title for the RSS feed (usually the name of the website)
+blog_description="" #Short description of the blog
+website_link="" #Website url
+
 # Example 
 # user="name"
 # website="127.0.0.1" or website="example.com" (this can be the server IP or your domain, however you have it setup for SSH is fine)
