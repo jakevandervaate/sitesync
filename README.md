@@ -1,8 +1,8 @@
 # SiteSync
 
-This is my system for designing and editing basic, static websites. It uses a shell script, common HTML headers and footers, and separate "content" files to generate local (demo) and public (deployed) versions of websites.
+This is my system for designing and editing basic, static websites. It uses a shell script, common HTML headers and footers, and separate "content" files to generate local (build) and public (deployed) versions of websites.
 
-This script has 2 basic commands, "demo" and "deploy". These scripts act on the different directories provided in this repo. 
+This script has 2 basic commands, "build" and "deploy". These scripts act on the different directories provided in this repo. 
 
 ## Directories
 
@@ -26,11 +26,11 @@ This script currently supports the files in this content directory, and optional
 
 ### Local
 
-When you run the command `path/to/sitesync.sh demo yourwebsite/`, the script will gather the various files from the content and assets directories, place the "content" files between the header.html and footer.html files, and places them in this local directory in the same structure that is present in the content directory. You can test this local version of your website in your web browser of choice to see how it looks and make changes.
+When you run the command `path/to/sitesync.sh build yourwebsite/`, the script will gather the various files from the content and assets directories, place the "content" files between the header.html and footer.html files, and places them in this local directory in the same structure that is present in the content directory. You can test this local version of your website in your web browser of choice to see how it looks and make changes.
 
 ### Public
 
-When you run the command `path/to/sitesync.sh deploy yourwebsite/`, the script does the same this as the "demo" argument (it just places the files in this directory instead), and then mirrors this directory to the server that you identify in the config file. 
+When you run the command `path/to/sitesync.sh deploy yourwebsite/`, the script does the same this as the "build" argument (it just places the files in this directory instead), and then mirrors this directory to the server that you identify in the config file. 
 
 The separate "local" and "public" allow you to develop your website and make changes, while preserving the current files that are present on your server.
 
@@ -43,13 +43,13 @@ Place your server credentials in this file, inside the quotes for each variable.
 
 Start the script by with the command for the script (`./sitesync.sh` if you're in the same directory as the script). 
 
-The options for the second argument are either `demo`, or `deploy`. 
+The options for the second argument are either `build`, or `deploy`. 
 
 The third argument should be the path to the directory of your website, like `example/`. 
 
 Here are examples of the whole command (assuming you are in the same directory as the script and the websites)
 
-`./sitesync.sh demo example/` generates a local version of the website.
+`./sitesync.sh build example/` generates a local version of the website.
 
 or 
 
@@ -72,7 +72,7 @@ Make the script executable:
 
 Now you are ready to use the script. This repo includes an example directory that you can test the script on. 
 
-`./sitesync demo example/`
+`./sitesync build example/`
 
 Now you can view the local version of this website. Navigate to the `example/local/` directory, and open the index.html file in your browser of choice (double click the file if you're using a GUI file explorer, or run `yourbrowser index.html` if you're using the command line). 
 
