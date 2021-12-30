@@ -103,10 +103,10 @@ deploy() {
 
 ## Directory structure
 
-This is the basic directory structure that SiteSync creates with the **init** command, along with a config file saved in $XDG_CONFIG_HOME/sitesync (SiteSync creates this directory if it doesn't exist already.
+This is the basic directory structure that SiteSync creates with the **init** command, along with a config file saved in $XDG_CONFIG_HOME/sitesync (SiteSync creates this directory if it doesn't exist already).
 
 ```bash
-example
+example/
 ├── assets
 │   ├── styles.css
 │   └── template.html
@@ -115,8 +115,8 @@ example
 │   │   └── 2021-12-30_An_example_post.md
 │   ├── blog.html
 │   └── index.md
-├── local
-└── public
+├── local/
+└── public/
 ```
 
 The config directory is structured like this, with a config file for each website that's been initialized with the **init** command:
@@ -126,3 +126,10 @@ $XDG_CONFIG_HOME/sitesync/
 ├── example
 └── another_example_website
 ```
+
+## Compatibility
+
+| Linux   | Works                                                                                     |
+| Windows | Works through Windows Subsystem for Linux (WSL)                                           |
+| MacOS   | Needs GNU Sed installed, and all instances of `sed` in the script substituted with `gsed` |
+| *BSD    | Don't know, but probably needs a different Sed implementation, similar to MacOS           |
