@@ -129,7 +129,10 @@ $XDG_CONFIG_HOME/sitesync/
 
 ## Compatibility
 
+| OS      | Compatibility                                                                             |
+| :---    | :---                                                                                      |
 | Linux   | Works                                                                                     |
 | Windows | Works through Windows Subsystem for Linux (WSL)                                           |
 | MacOS   | Needs GNU Sed installed, and all instances of `sed` in the script substituted with `gsed` |
 | *BSD    | Don't know, but probably needs a different Sed implementation, similar to MacOS           |
+
