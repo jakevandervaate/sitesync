@@ -1,98 +1,128 @@
 # SiteSync
 
-This is my system for designing and editing basic, static websites. It uses a shell script, common HTML headers and footers, and separate "content" files to generate local (build) and public (deployed) versions of websites.
+SiteSync is my flexible static-site generator.
+The script can do the following:
 
-This script has 2 basic commands, "build" and "deploy". These scripts act on the different directories provided in this repo. 
+* Initialize a website directory with the minimum amount of files and structure that the script needs to run the "build" command
+* Generate a local, "testing" version of the website where you can make and view changes before making it live
+* Generate a public version of the site, which can be mirrored to where it is served from with a user-configured deploy command
 
-## Directories
+## Install
 
-These repo features 4 directories and a config file. The 4 directories are "assets", "content", "local", and "public". 
+1. Install this script by cloning this repository
 
-### Assets
+`git clone this_page's_url`
 
-This directory houses all the common files that the website can share, including the HTML header and footer for the website. 
+2. cd into the cloned repositority directory
 
-The HTML header can be as basic as the minimum information included at the beginning of and HTML file. You can also include any menus or title bars that you want to be present on every page. 
+`cd sitesync`
 
-The HTML footer serves a similar function; it can be as basic as thae minimum information you need, or have as many links or other elements as you please.
+3. Install the script with make
 
-You can also add any other files you want to be placed in the root directory of your website (styles.css, robots.txt, humans.txt, favicon.ico, etc.). Everything in this directory, except for the header and footer, will be synced into the website's root directory when you run the sitesync.sh script.
+`make install`
 
-### Content
+The script installs at *.local/bin/*, and the manual installs at .local/share/man/man1/sitesync.1
 
-This directory is where all of the "content" of the site's HTML files live. The content in these files is the information that you want to be unique to each page of your website. Files in this directory don't need the standard HTML file beginning and ending information (that's what the header and footer are for), but should be written in HTML.
-
-This script currently supports the files in this content directory, and optionally once directory level below this. For example you could have your root directory with index.html, blog.html, and about.html, as well as a blog/ directory where you can store blog posts (the same rules apply as far as header and footer information go). 
-
-### Local
-
-When you run the command `path/to/sitesync.sh build yourwebsite/`, the script will gather the various files from the content and assets directories, place the "content" files between the header.html and footer.html files, and places them in this local directory in the same structure that is present in the content directory. You can test this local version of your website in your web browser of choice to see how it looks and make changes.
-
-### Public
-
-When you run the command `path/to/sitesync.sh deploy yourwebsite/`, the script does the same this as the "build" argument (it just places the files in this directory instead), and then mirrors this directory to the server that you identify in the config file. 
-
-The separate "local" and "public" allow you to develop your website and make changes, while preserving the current files that are present on your server.
-
-### Config
-
-Place your server credentials in this file, inside the quotes for each variable. this config file allows the sitesync script to work on multiple websites that you may want to maintain and develop. 
+Access the manual page with `man sitesync`
 
 
-## Usage 
+## Commands
 
-Start the script by with the command for the script (`./sitesync.sh` if you're in the same directory as the script). 
+SiteSync uses the following syntax:
 
-The options for the second argument are either `build`, or `deploy`. 
+sitesync [OPTION] [DIRECTORY]
 
-The third argument should be the path to the directory of your website, like `example/`. 
+### Options
 
-Here are examples of the whole command (assuming you are in the same directory as the script and the websites)
+These are SiteSync's available options:
 
-`./sitesync.sh build example/` generates a local version of the website.
+#### init
 
-or 
+**init**
+: Creates a new website directory, with the minimal structure and files necessary for the **build** option to work
 
-`./sitesync.sh deploy example/` generates a public version, and syncs to your server.
+#### build
+
+**build**
+: Performs the following actions to build a local version of the website:
+
+* Syncs html files from the *content/* directory in the *local/* directory
+* Converts Markdown files in the *content/* directory into html files in the *local/* directory
+* Builds a blog page with links to any files stored in the */content/blog/* directory (blog.html is the default blog file)
+* Wraps all html files in the template stored in the *assets/template.html* file
+* Creates links to the root directory by replacing the `{{ root }}` template placeholder with the proper link back to the website root
+* Generates a sitemap.xml file and stores it in *assets/sitemap.xml*
+* Copies all non-html files from the *assets/* directory to the *local/* directory
+
+After running the **build** command, the user can open their website in their web browser at *file:///absolute/path/to/website/local/index.html*
+
+You may also run a local server to the website with Python's built-in server command:
+
+```python
+python3 -m http.server 3000 --directory example/local/
+```
+
+*example/local* represents the path to your website's *local/* directory
 
 
-## Installation
+#### deploy
 
-Clone this repository:
+**deploy**
+: performs the same website build process as **build** with the *public/* directory as the target, and deploys the website with the user configurable `deploy` command, defined in the website config file stored at $XDG_CONFIG_HOME/sitesync/ (the config file has the same name as the website directory)
 
-`git clone https://gitlab.com/jakevandervaate/sitesync.git`
+#### User-confureable deploy command
 
-cd into the newly cloned directory:
+Configure a website's deploy command by editing the deploy function stored in the $XDG_CONFIG_HOME/sitesync/ config file.
+A website directory with the name *example/* will have a config file stored at $XDG_CONFIG_HOME/sitesync/example.
 
-`cd sitesync/`
+The deploy command doesn't deploy the website to anywhere until the user defines the command.
 
-Make the script executable:
+There are a few options the user can consider when configuring their deploy command:
 
-`chmod +x ./sitesync.sh`
+##### Sync website to a server with rsync
 
-Now you are ready to use the script. This repo includes an example directory that you can test the script on. 
+You can sync the *public/* directory to a server using SiteSync's built in variables with the following command.
 
-`./sitesync build example/`
+```bash
+deploy() {
+	rsync -az --delete "$site_dir"/public/ user@"$website":path/to/server/website/directory/
+}
+```
 
-Now you can view the local version of this website. Navigate to the `example/local/` directory, and open the index.html file in your browser of choice (double click the file if you're using a GUI file explorer, or run `yourbrowser index.html` if you're using the command line). 
+##### Push the site to a git repository
 
+If you'd like to serve the website through a git repository that deploys a website through [Github Pages](https://pages.github.com/), [GitLab pages](https://docs.gitlab.com/ee/user/project/pages/), or [Netlify](https://www.netlify.com/) you can do something similar to the following:
 
-Now you can use this to create as many websites as you like. Just make sure that they all feature the basic directory structure that I've written aout here.
+```bash
+deploy() {
+	git add -A #stage all new and updated files
+	git commit -m "generic commit message" #commit all files
+	git push #push files to git and trigger deployment
+}
+```
 
-## Blogsync
+## Directory structure
 
-Blogsync adds a blog functionality to the website. Blogsync.sh is a seperate script from Sitesync. Before running Blogsync, configure the config file in the website's directory (it has comments).
+This is the basic directory structure that SiteSync creates with the **init** command, along with a config file saved in $XDG_CONFIG_HOME/sitesync (SiteSync creates this directory if it doesn't exist already.
 
-Once the config file is configured create a blog directory in the "content" directory.
+```bash
+example
+├── assets
+│   ├── styles.css
+│   └── template.html
+├── content
+│   ├── blog
+│   │   └── 2021-12-30_An_example_post.md
+│   ├── blog.html
+│   └── index.md
+├── local
+└── public
+```
 
-``cd example/content/ && mkdir blog``
+The config directory is structured like this, with a config file for each website that's been initialized with the **init** command:
 
-The naming convention for blog posts in the blog/ directory is yyyy-mm-dd_Name_of_the_Post.html.
-This syntax is important for the ordering of the blog posts on the blog page.
-The blog page displays posts in reverse-chronological order (newest posts at the top of the page) and needs the date in this format to do that correctly.
-
-Once the config file is setup, the content/blog directory exists, and there is at least one blog post in the directory, run the following command to generate the blog page and RSS file.
-
-``path/to/blogsync.sh path/to/website`` 
-
-where "website" is the root directory for the site.
+```bash
+$XDG_CONFIG_HOME/sitesync/
+├── example
+└── another_example_website
+```
