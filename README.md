@@ -6,7 +6,7 @@ This script has 2 basic commands, "build" and "deploy". These scripts act on the
 
 ## Directories
 
-These repo features 4 directories and a config file. The 4 directories are "assets", "ccontent", "local", and "public". 
+These repo features 4 directories and a config file. The 4 directories are "assets", "content", "local", and "public". 
 
 ### Assets
 

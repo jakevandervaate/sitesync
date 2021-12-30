@@ -1,0 +1,147 @@
+#!/bin/sh
+
+website="$2"
+command="$1"
+
+main() {
+case "$command" in
+	"build") set_target && target_dir="local" && build ;;
+	"deploy") set_target && target_dir="public" && build && deploy ;;
+	"init") init ;;
+esac
+}
+
+set_target() {
+cd "$website" && site_dir="$(pwd)" || exit
+content="$site_dir/content"
+assets="$site_dir/assets"
+. "$XDG_CONFIG_HOME"/sitesync/"$website"
+}
+
+convert_md() {
+	find "$content"/ -name '*.md' | while IFS= read -r file; do
+		html_file=$(echo "$file" | sed -e 's|md|html|g' -e "s|$content|$target_dir|g")
+		lowdown "$file" > "$html_file"
+	done
+}
+
+wrap_content() {
+	find "$target_dir" ! -name "$(printf "*\n*")" -name '*.html' | while IFS= read -r file; do
+		cp "$assets"/template.html "$target_dir"/tmp.html
+		sed -i -e "/{{ content }}/r ""$file""" -e "/{{ content }}/d" "$target_dir"/tmp.html
+		mv "$target_dir"/tmp.html "$file"
+		page_title="$(grep -m 1 "<[Hh]1" """$file""" | \
+			sed -e "s|<[Hh]1.*\">||g" -e "s|<[Hh]1>||g" -e "s|</[Hh]1>||g")"
+		sed -i "s|{{ title }}|""$page_title""|g" "$file"
+	done
+}
+
+clean_paths() {
+	sed -i "s|{{ root }}|\.|g" "$site_dir"/"$target_dir"/*.html 2>/dev/null || :
+	sed -i 's|{{ root }}|\.\.|g' "$site_dir"/"$target_dir"/*/*.html 2>/dev/null || :
+	sed -i 's|{{ root }}|\.\.\/\.\.|g' "$site_dir"/"$target_dir"/*/*/*.html 2>/dev/null || :
+}
+
+content_to_target() { rsync -a --delete --exclude "*.md" "$content"/ "$target_dir"/; }
+
+assets_to_target(){ rsync -a --delete --exclude "*.html" "$assets"/* "$target_dir"/; }
+
+blog_build() {
+	cd "$target_dir/" || exit
+	#sed -i '/^<p><a href/d' "$blog_page" #reset the links on the blog page
+
+	for file in "$post_dir"/*; do
+		ls -r "$post_dir"/*.html > posts.tmp
+	done #generate the new list of links to blog posts
+
+	while read -r line; do \
+	page_text="$(echo """$line""" | sed -e 's/_/ /g' -e 's|blog\/||g' -e 's|.html||g')" && \
+	echo "$line" | sed "s|^.*$|<p><a href=""$line"">""$page_text""</a></p>""|g"; \
+	done < posts.tmp >> "$blog_page" #format links properly for webpage
+	rm posts.tmp
+
+	echo "<rss version=\"2.0\"> \
+ 	<channel> \
+  	<title>""$blog_title""</title> \
+   	<link>""$website_link""</link> \
+   	<description>""$blog_description""</description>" > "$assets"/"$rss_file"
+	for file in "$post_dir"/*; do
+		blog_name="$(echo """$file""" | sed -e 's/blog\/....-..-.._//g' -e 's/\.html//g' -e 's/_/ /g')"
+		echo "     <item> \
+      	<title>""$blog_name""</title> \
+      	<link>""$website_link""/""$file""</link> \
+      	<description> \
+	<![CDATA[$(cat $file)]]> \
+      	</description> \
+     	</item>" >> "$assets"/"$rss_file"
+	done
+	echo " </channel> \
+	</rss>" >> "$assets"/"$rss_file"
+	cd ..
+}
+
+generate_sitemap() {
+	echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' > "$assets"/sitemap.xml
+	find "$target_dir" ! -name "$(printf "*\n*")" -name '*.html' | while IFS= read -r file; do
+		echo "	<url>
+		<loc>$website_link/$file</loc>
+	</url>" | sed "s|$target_dir\/||g" >> "$assets"/sitemap.xml
+	done
+	echo "</urlset>" >> "$assets"/sitemap.xml
+}
+
+build() {
+	content_to_target
+	convert_md
+	blog_build
+	wrap_content
+	clean_paths
+	generate_sitemap
+	assets_to_target
+}
+
+init() {
+	if [ ! -d "$XDG_CONFIG_HOME/sitesync" ]; then
+		mkdir "$XDG_CONFIG_HOME/sitesync"
+	fi
+
+	mkdir -p "$website"/content/blog
+	echo "# Index
+
+The index page" > "$website"/content/index.md
+	echo "<h1>Blog</h1>
+" > "$website"/content/blog.html
+	echo '# Example blog post' > "$website"/content/blog/"$(date +%Y-%m-%d)_An_example_post.md"
+	mkdir -p "$website"/local
+	mkdir -p "$website"/public
+	mkdir -p "$website"/assets
+	touch "$website"/assets/styles.css
+	echo 'deploy() {
+	echo "deploy command"
+}
+
+#Blog Feature Variables
+blog_page="blog.html" #the page where blog posts are displayed
+post_dir="blog" #the subdirectory in the content directory where blog posts are stored
+rss_file="rss.xml"
+blog_title="" #the title for the RSS feed (usually the name of the website)
+blog_description="" #Short description of the blog
+website_link="" #Website url' > "$XDG_CONFIG_HOME/sitesync/$website"
+
+	echo '<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>{{ title }}</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" type="text/css" href="{{ root }}/style.css" />
+</head>
+<body>
+
+{{ content }}
+
+</body>
+</html>' > "$website"/assets/template.html
+}
+
+main
