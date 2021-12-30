@@ -70,7 +70,7 @@ python3 -m http.server 3000 --directory example/local/
 **deploy**
 : performs the same website build process as **build** with the *public/* directory as the target, and deploys the website with the user configurable `deploy` command, defined in the website config file stored at $XDG_CONFIG_HOME/sitesync/ (the config file has the same name as the website directory)
 
-#### User-confureable deploy command
+#### User-configurable cable fable deploy command
 
 Configure a website's deploy command by editing the deploy function stored in the $XDG_CONFIG_HOME/sitesync/ config file.
 A website directory with the name *example/* will have a config file stored at $XDG_CONFIG_HOME/sitesync/example.
