@@ -7,7 +7,6 @@ The script can do the following:
 * Generate a local, "testing" version of the website where you can make and view changes before making it live
 * Generate a public version of the site, which can be mirrored to where it is served from with a user-configured deploy command
 
-[TOC]
 
 ## Dependencies
 
