@@ -1,27 +1,27 @@
 #!/bin/sh
 
-website="$2"
+website="$(echo """$2""" | sed 's|\/$||g')" #strip trailing / if included
 command="$1"
 
 main() {
-case "$command" in
-	"build") set_target && target_dir="local" && build ;;
-	"deploy") set_target && target_dir="public" && build && deploy ;;
-	"init") init ;;
-esac
+	case "$command" in
+		"build") set_target && target_dir="local" && build ;;
+		"deploy") set_target && target_dir="public" && build && deploy ;;
+		"init") init ;;
+	esac
 }
 
 set_target() {
-cd "$website" && site_dir="$(pwd)" || exit
-content="$site_dir/content"
-assets="$site_dir/assets"
-. "$XDG_CONFIG_HOME"/sitesync/"$website"
+	cd "$website" && site_dir="$(pwd)" || exit
+	content="$site_dir/content"
+	assets="$site_dir/assets"
+	. "$XDG_CONFIG_HOME"/sitesync/"$website"
 }
 
 convert_md() {
 	find "$content"/ -name '*.md' | while IFS= read -r file; do
 		html_file=$(echo "$file" | sed -e 's|md|html|g' -e "s|$content|$target_dir|g")
-		lowdown "$file" > "$html_file"
+		md_command #Define this in the website config file (uses Pandoc by default)
 	done
 }
 
@@ -37,9 +37,9 @@ wrap_content() {
 }
 
 clean_paths() {
-	sed -i "s|{{ root }}|\.|g" "$site_dir"/"$target_dir"/*.html 2>/dev/null || :
-	sed -i 's|{{ root }}|\.\.|g' "$site_dir"/"$target_dir"/*/*.html 2>/dev/null || :
-	sed -i 's|{{ root }}|\.\.\/\.\.|g' "$site_dir"/"$target_dir"/*/*/*.html 2>/dev/null || :
+	perl -pi -e 's|{{ root }}|\.|g' "$site_dir"/"$target_dir"/*.html 2>/dev/null || :
+	perl -pi -e 's|{{ root }}|\.\.|g' "$site_dir"/"$target_dir"/*/*.html 2>/dev/null || :
+	perl -pi -e 's|{{ root }}|\.\.\/\.\.|g' "$site_dir"/"$target_dir"/*/*/*.html 2>/dev/null || :
 }
 
 content_to_target() { rsync -a --delete --exclude "*.md" "$content"/ "$target_dir"/; }
@@ -48,34 +48,33 @@ assets_to_target(){ rsync -a --delete --exclude "*.html" "$assets"/* "$target_di
 
 blog_build() {
 	cd "$target_dir/" || exit
-	#sed -i '/^<p><a href/d' "$blog_page" #reset the links on the blog page
 
 	for file in "$post_dir"/*; do
 		ls -r "$post_dir"/*.html > posts.tmp
 	done #generate the new list of links to blog posts
 
-	while read -r line; do \
-	page_text="$(echo """$line""" | sed -e 's/_/ /g' -e 's|blog\/||g' -e 's|.html||g')" && \
-	echo "$line" | sed "s|^.*$|<p><a href=""$line"">""$page_text""</a></p>""|g"; \
-	done < posts.tmp >> "$blog_page" #format links properly for webpage
-	rm posts.tmp
+	while read -r line; do
+		page_text="$(echo """$line""" | sed -e 's/_/ /g' -e 's|blog\/||g' -e 's|.html||g')" 	
+		echo "$line" | sed "s|^.*$|<p><a href=""$line"">""$page_text""</a></p>""|g"
+	done < posts.tmp >> "$blog_page" && rm posts.tmp #format links properly for webpage
 
-	echo "<rss version=\"2.0\"> \
- 	<channel> \
-  	<title>""$blog_title""</title> \
-   	<link>""$website_link""</link> \
+	echo "<rss version=\"2.0\">\
+ 	<channel>\
+  	<title>""$blog_title""</title>\
+   	<link>""$website_link""</link>\
    	<description>""$blog_description""</description>" > "$assets"/"$rss_file"
+
 	for file in "$post_dir"/*; do
 		blog_name="$(echo """$file""" | sed -e 's/blog\/....-..-.._//g' -e 's/\.html//g' -e 's/_/ /g')"
-		echo "     <item> \
-      	<title>""$blog_name""</title> \
-      	<link>""$website_link""/""$file""</link> \
-      	<description> \
-	<![CDATA[$(cat $file)]]> \
-      	</description> \
+		echo "     <item>\
+      	<title>""$blog_name""</title>\
+      	<link>""$website_link""/""$file""</link>\
+      	<description>\
+	<![CDATA[$(cat """$file""")]]>\
+      	</description>\
      	</item>" >> "$assets"/"$rss_file"
 	done
-	echo " </channel> \
+	echo "	</channel>\
 	</rss>" >> "$assets"/"$rss_file"
 	cd ..
 }
@@ -120,26 +119,46 @@ The index page" > "$website"/content/index.md
 	echo "deploy command"
 }
 
+md_command() {
+	#"$file" is the input .md file variable and "$html_file" is the output file variable
+	pandoc -i "$file" -o "$html_file"
+}
+
 #Blog Feature Variables
 blog_page="blog.html" #the page where blog posts are displayed
 post_dir="blog" #the subdirectory in the content directory where blog posts are stored
 rss_file="rss.xml"
-blog_title="" #the title for the RSS feed (usually the name of the website)
+blog_title="Blog" #the title for the RSS feed (usually the name of the website)
 blog_description="" #Short description of the blog
 website_link="" #Website url' > "$XDG_CONFIG_HOME/sitesync/$website"
 
 	echo '<!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>{{ title }}</title>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" type="text/css" href="{{ root }}/style.css" />
+	<title>{{ title }}</title>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<link rel="stylesheet" type="text/css" href="{{ root }}/style.css" />
 </head>
 <body>
+<header>
+	<a class="site-title">Website Title</a>
+	<nav>
+		<ul>
+			<li><a href="{{ root }}/index.html">Home</a></li>
+			<li><a href="{{ root }}/blog.html">Blog</a></li>
+			<li><a href="{{ root }}/links.html">Links</a></li>
+		</ul>
+	</nav>
+</header>
+<main>
 
 {{ content }}
 
+</main>
+<footer>
+	<p>Website Generated by <a href="github.com/jakevandervaate/sitesync">SiteSync</a></p>
+</footer>
 </body>
 </html>' > "$website"/assets/template.html
 }

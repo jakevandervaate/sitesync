@@ -7,13 +7,29 @@ The script can do the following:
 * Generate a local, "testing" version of the website where you can make and view changes before making it live
 * Generate a public version of the site, which can be mirrored to where it is served from with a user-configured deploy command
 
+[TOC]
+
+## Dependencies
+
+Sitesync uses the GNU Coreutils found on most Linux systems; the following programs need to be installed as well:
+
+* A text editor
+* Rsync
+* Perl
+* A Markdown processor that can create non-standalone documents, without HTML headers or footers (if the user wants Markdown -> HTML conversion).
+  These are some options that work:
+  * Lowdown
+  * Pandoc
+* Git or OpenSSH (to deploy the website)
+
+
 ## Install
 
 1. Install this script by cloning this repository
 
 `git clone this_page's_url`
 
-2. cd into the cloned repositority directory
+2. cd into the cloned repository directory
 
 `cd sitesync`
 
@@ -70,7 +86,7 @@ python3 -m http.server 3000 --directory example/local/
 **deploy**
 : performs the same website build process as **build** with the *public/* directory as the target, and deploys the website with the user configurable `deploy` command, defined in the website config file stored at $XDG_CONFIG_HOME/sitesync/ (the config file has the same name as the website directory)
 
-#### User-configurable cable fable deploy command
+#### User-configurable deploy command
 
 Configure a website's deploy command by editing the deploy function stored in the $XDG_CONFIG_HOME/sitesync/ config file.
 A website directory with the name *example/* will have a config file stored at $XDG_CONFIG_HOME/sitesync/example.
@@ -89,7 +105,7 @@ deploy() {
 }
 ```
 
-##### Push the site to a git repository
+##### Push the site to a Git repository
 
 If you'd like to serve the website through a git repository that deploys a website through [Github Pages](https://pages.github.com/), [GitLab pages](https://docs.gitlab.com/ee/user/project/pages/), or [Netlify](https://www.netlify.com/) you can do something similar to the following:
 
@@ -101,7 +117,7 @@ deploy() {
 }
 ```
 
-## Directory structure
+## Website directory structure
 
 This is the basic directory structure that SiteSync creates with the **init** command, along with a config file saved in $XDG_CONFIG_HOME/sitesync (SiteSync creates this directory if it doesn't exist already).
 
@@ -135,4 +151,3 @@ $XDG_CONFIG_HOME/sitesync/
 | Windows | Works through Windows Subsystem for Linux (WSL)                                           |
 | MacOS   | Needs GNU Sed installed, and all instances of `sed` in the script substituted with `gsed` |
 | *BSD    | Don't know, but probably needs a different Sed implementation, similar to MacOS           |
-

@@ -44,10 +44,6 @@ sitesync requires a the folder/file structure that the **init** arugment provide
 **sitesync deploy path/to/example**
 : the deploy command builds the website into the "public" directory and then can mirror the website to where it is served with the deploy command defined in the "$XDG_CONFIG_HOME"/sitesync/example" file.
 
-# EXIT VALUES
-**0**
-: Success
-
 # BUGS
 This script requires the basic directory structure provided by the **init** command.
 The script will also not correct absolute file paths to the root of the site deeper than 3 directories from the site root (e.g. root/subdir/anothersubdir/file.html would work).
