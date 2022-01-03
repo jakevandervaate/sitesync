@@ -142,6 +142,20 @@ $XDG_CONFIG_HOME/sitesync/
 └── another_example_website
 ```
 
+## Template file
+
+Sitesync uses the *assets/template.html* file to define the HTML header and footer for the website.
+The template should have the header, nav menu, footer, and any other content that the user wants on every page of their site.
+
+These are the file template options:
+
+| Option        | Purpose                                                                                                                                                                                                                                      |
+| :---          | :---                                                                                                                                                                                                                                         |
+| {{ root }}    | Used for file paths that should lead to the root of the website after Sitesync runs. This exists for subdirectories like *blog/* that need the nav menu links to be ../page-name.html to point to the pages in the website's root directory. |
+| {{ title }}   | The title for each page uses each page's first <h1>                                                                                                                                                                                          |
+| {{ content }} | Used as the placeholder for the content from each page in the *content/* directory                                                                                                                                                           |
+
+
 ## Compatibility
 
 | OS      | Compatibility                                                                             |
@@ -149,4 +163,4 @@ $XDG_CONFIG_HOME/sitesync/
 | Linux   | Works                                                                                     |
 | Windows | Works through Windows Subsystem for Linux (WSL)                                           |
 | MacOS   | Needs GNU Sed installed, and all instances of `sed` in the script substituted with `gsed` |
-| *BSD    | Don't know, but probably needs a different Sed implementation, similar to MacOS           |
+| *BSD    | Probably needs a different Sed implementation, similar to MacOS                           |
